@@ -3,7 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 import uvicorn
+from dotenv import load_dotenv
 from .routers import router as metrics_router
+
+load_dotenv()
 
 app = FastAPI(title="RetailOdyssey", version="1.0.0")
 
