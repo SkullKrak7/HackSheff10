@@ -51,10 +51,27 @@ Multi-agent fashion recommendation system for HackSheffield10.
 - Frontend: Streamlit
 - AI: OpenAI GPT-4o-mini
 - Monitoring: Grafana + Prometheus
+- Deployment: Docker + Docker Compose
 - License: MIT
 
 ## Quick Start
 
+### Option 1: Docker (Recommended)
+```bash
+# Set up environment
+cp .env.example .env
+# Add your OPENAI_API_KEY to .env
+
+# Start all services
+docker-compose up -d
+
+# Access
+# - Streamlit UI: http://localhost:8501
+# - API: http://localhost:8000
+# - Grafana: http://localhost:3000
+```
+
+### Option 2: Local Development
 ```bash
 # Install dependencies
 pip install -r requirements.txt
