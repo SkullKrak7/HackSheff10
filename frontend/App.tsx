@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import MultiAgentChat from './components/MultiAgentChat';
-import Questionnaire from './components/Questionnaire';
+import GuidedMode from './components/GuidedMode';
 
 const App: React.FC = () => {
   const [mode, setMode] = useState<'chat' | 'questionnaire'>('chat');
@@ -31,7 +31,7 @@ const App: React.FC = () => {
         </div>
       </div>
       
-      {mode === 'chat' ? <MultiAgentChat /> : <div className="p-8">Questionnaire coming soon</div>}
+      {mode === 'chat' ? <MultiAgentChat /> : <GuidedMode />}
     </div>
   );
 };
