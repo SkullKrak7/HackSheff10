@@ -41,9 +41,12 @@ async def chat(request: ChatRequest):
         }
         
         if r.content.startswith("IMAGE_URL:"):
-            image_url = r.content.replace("IMAGE_URL:", "")
-            response_data["image_url"] = image_url
-            response_data["message"] = "Generated outfit visualization"
+            image_data = r.content.replace("IMAGE_URL:", "")
+            if not image_data.startswith("demo_mode"):
+                response_data["image_base64"] = image_data
+                response_data["message"] = "Generated outfit visualization"
+            else:
+                response_data["message"] = image_data
         
         formatted_responses.append(response_data)
     

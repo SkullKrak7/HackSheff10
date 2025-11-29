@@ -1,33 +1,39 @@
 import os
-from openai import AsyncOpenAI
+import base64
+import io
+import google.generativeai as genai
 
-_client = None
+_configured = False
 
-def get_client():
-    global _client
-    if _client is None:
-        api_key = os.getenv("OPENAI_API_KEY")
+def configure_gemini():
+    global _configured
+    if not _configured:
+        api_key = os.getenv("GEMINI_API_KEY")
         if api_key:
-            _client = AsyncOpenAI(api_key=api_key)
-    return _client
+            genai.configure(api_key=api_key)
+            _configured = True
+    return _configured
 
 async def generate_outfit_image(description: str) -> str:
-    client = get_client()
-    
-    if not client:
-        return "demo_mode:Image generation requires OpenAI API key"
+    if not configure_gemini():
+        return "demo_mode:Image generation requires Gemini API key"
     
     try:
-        prompt = f"Professional fashion photography: {description}. Studio lighting, neutral background, high quality, detailed."
+        model = genai.GenerativeModel('imagen-3.0-generate-001')
+        prompt = f"Professional fashion photography: {description}. Studio lighting, neutral background, high quality."
         
-        response = await client.images.generate(
-            model="dall-e-3",
+        response = model.generate_images(
             prompt=prompt,
-            size="1024x1024",
-            quality="standard",
-            n=1
+            number_of_images=1,
+            aspect_ratio="3:4"
         )
         
-        return response.data[0].url
+        if response.images:
+            img = response.images[0]._pil_image
+            buffered = io.BytesIO()
+            img.save(buffered, format="JPEG")
+            img_base64 = base64.b64encode(buffered.getvalue()).decode()
+            return img_base64
+        return "demo_mode:No image generated"
     except Exception as e:
-        return f"demo_mode:Error generating image: {str(e)}"
+        return f"demo_mode:Error: {str(e)}"

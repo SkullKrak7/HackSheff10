@@ -86,7 +86,7 @@ export const generateOutfitVisual = async (description: string): Promise<string 
     });
     const data = await response.json();
     const imageResponse = data.responses?.find((r: any) => r.agent === 'ImageGenAgent');
-    return imageResponse?.image_url || null;
+    return imageResponse?.image_base64 || null;
   } catch (error) {
     console.error("Image Generation Error:", error);
     return null;

@@ -26,6 +26,10 @@ class GroupChatOrchestrator:
         
         relevant_agents = self._identify_relevant_agents(user_message, image_url)
         
+        # Auto-add ImageGenAgent if RecommendationAgent is triggered
+        if "RecommendationAgent" in relevant_agents and "ImageGenAgent" not in relevant_agents:
+            relevant_agents.append("ImageGenAgent")
+        
         responses = []
         for agent_name in relevant_agents:
             response = await self._get_agent_response(agent_name, user_message, image_url)
