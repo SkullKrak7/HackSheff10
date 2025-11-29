@@ -1,46 +1,46 @@
 import os
 import base64
-import google.generativeai as genai
+import io
+from google import genai
+from google.genai import types
 
-_configured = False
+_client = None
 
-def configure_gemini():
-    global _configured
-    if not _configured:
+def get_client():
+    global _client
+    if _client is None:
         api_key = os.getenv("GEMINI_API_KEY")
         if api_key:
-            genai.configure(api_key=api_key)
-            _configured = True
-    return _configured
+            _client = genai.Client(api_key=api_key)
+    return _client
 
 async def generate_outfit_image(description: str) -> str:
-    if not configure_gemini():
+    client = get_client()
+    
+    if not client:
         return "demo_mode:Image generation requires Gemini API key"
     
     try:
-        model = genai.GenerativeModel('gemini-1.5-pro')
+        prompt = f"Professional fashion photography: {description}. Studio lighting, neutral background, high quality, detailed clothing."
         
-        prompt = f"""Generate a professional fashion photograph showing: {description}
-        
-Requirements:
-- Studio lighting with neutral background
-- High quality, detailed clothing
-- Fashion photography style
-- 3:4 aspect ratio portrait orientation"""
-        
-        response = model.generate_content(
-            prompt,
-            generation_config={
-                'temperature': 0.7,
-                'response_modalities': ['image']
-            }
+        response = client.models.generate_content(
+            model="gemini-3-pro-image-preview",
+            contents=[prompt],
+            config=types.GenerateContentConfig(
+                response_modalities=['IMAGE'],
+                image_config=types.ImageConfig(
+                    aspect_ratio="3:4",
+                    image_size="2K"
+                )
+            )
         )
         
-        # Extract image from response
-        if response.candidates and len(response.candidates) > 0:
-            for part in response.candidates[0].content.parts:
-                if hasattr(part, 'inline_data') and part.inline_data:
-                    return part.inline_data.data
+        for part in response.parts:
+            if image := part.as_image():
+                buffered = io.BytesIO()
+                image.save(buffered, format="JPEG")
+                img_base64 = base64.b64encode(buffered.getvalue()).decode()
+                return img_base64
         
         return "demo_mode:No image generated"
     except Exception as e:
