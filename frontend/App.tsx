@@ -10,7 +10,7 @@ import {
   analyzeUserIntent, 
   generateRecommendations, 
   generateOutfitVisual 
-} from './services/geminiService';
+} from './services/apiService';
 
 const App: React.FC = () => {
   // State for each stage of the data flow
