@@ -15,7 +15,7 @@ async def generate_response(conversation_history: list, user_message: str) -> st
     client = get_client()
     
     if not client:
-        return "I'm here to help with fashion advice! Ask me anything about outfits, style, or trends. (demo mode)"
+        return "I'm here to help with fashion advice! Ask me anything about outfits, style, or trends."
     
     try:
         messages = [

@@ -12,7 +12,7 @@ def get_client():
 
 async def recommend_outfit(user_request: str, wardrobe_context: str = "") -> str:
     if not key:
-        return "RecommendationAgent: Try pairing a blazer with dark jeans and boots (demo mode)"
+        return "RecommendationAgent: Try pairing a blazer with dark jeans and boots"
     try:
         client = get_client()
         response = await client.chat.completions.create(

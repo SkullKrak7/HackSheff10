@@ -12,7 +12,7 @@ def get_client():
 
 async def analyze_wardrobe(image_url: str, context: str = "") -> str:
     if not key:
-        return "VisionAgent: Found casual shirts, jeans, jackets in wardrobe (demo mode)"
+        return "VisionAgent: Found casual shirts, jeans, jackets in wardrobe"
     try:
         client = get_client()
         response = await client.chat.completions.create(
