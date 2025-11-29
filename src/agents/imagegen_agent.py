@@ -28,24 +28,25 @@ CRITICAL REQUIREMENTS:
 - Mannequin should be white/neutral colored
 - Studio lighting with clean white or light gray background
 - High quality, detailed clothing visible
-- Fashion retail display style
-- 3:4 portrait orientation"""
+- Fashion retail display style"""
         
-        response = client.models.generate_content(
-            model="gemini-1.5-pro",
-            contents=[prompt],
-            config=types.GenerateContentConfig(
-                response_modalities=['TEXT', 'IMAGE'],
-                temperature=0.7
+        response = client.models.generate_images(
+            model='imagen-3.0-generate-001',
+            prompt=prompt,
+            config=types.GenerateImagesConfig(
+                number_of_images=1,
+                aspect_ratio='3:4',
+                safety_filter_level='block_some',
+                person_generation='allow_adult'
             )
         )
         
-        for part in response.parts:
-            if image := part.as_image():
-                buffered = io.BytesIO()
-                image.save(buffered, format="JPEG")
-                img_base64 = base64.b64encode(buffered.getvalue()).decode()
-                return img_base64
+        if response.generated_images and len(response.generated_images) > 0:
+            image = response.generated_images[0].image
+            buffered = io.BytesIO()
+            image.save(buffered, format="JPEG")
+            img_base64 = base64.b64encode(buffered.getvalue()).decode()
+            return img_base64
         
         return "demo_mode:No image generated"
     except Exception as e:
