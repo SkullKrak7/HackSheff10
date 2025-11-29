@@ -1,1 +1,12 @@
-# Dockerfile: Build script for containerised deployment. Supports Pi/ARM64
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["python", "-m", "src.api.main"]
