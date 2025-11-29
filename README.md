@@ -2,54 +2,90 @@
 
 Multi-agent fashion recommendation system for HackSheffield10.
 
+## Challenge Alignment
+
+### Reply AI Agents Challenge
+- Multi-agent group conversation with 5 specialized agents
+- Agents collaborate and reference each other's insights
+- Targeted intent recognition routes queries to relevant agents
+- Context management across conversation history
+- Asynchronous agent coordination
+
+### Frasers Group Challenge
+- Next-gen retail engagement through AI fashion assistance
+- Personalized outfit recommendations
+- Wardrobe image analysis with GPT-4 Vision
+- Interactive chat interface for modern consumers
+
+### Grafana Challenge
+- Real-time metrics collection and monitoring
+- Prometheus metrics exporter
+- Pre-configured Grafana dashboard
+- Agent performance tracking
+
+### Theme: Odyssey
+- Fashion journey metaphor guiding users through style discovery
+- Multi-agent collaboration represents exploration and discovery
+- RetailOdyssey brand identity
+
 ## Features
 
 - Multi-agent AI collaboration
 - Fashion outfit recommendations
 - Wardrobe image analysis
 - Group chat interface
-
-## Setup
-
-```bash
-pip install -r requirements.txt
-cp .env.example .env
-# Add your OPENAI_API_KEY to .env
-```
-
-## Run
-
-Terminal 1:
-```bash
-python -m src.api.main
-```
-
-Terminal 2:
-```bash
-streamlit run frontend/streamlit_ui/app.py
-```
+- Real-time metrics and monitoring
 
 ## Architecture
 
-- VisionAgent: Analyzes wardrobe images
-- RecommendationAgent: Suggests outfits
+### AI Agents
+- VisionAgent: Analyzes wardrobe images using GPT-4 Vision
+- RecommendationAgent: Suggests outfits based on context
 - IntentAgent: Parses user requests
-- ConversationAgent: Manages dialogue
-- GroupChatOrchestrator: Coordinates agents
+- ConversationAgent: Manages dialogue flow
+- ImageGenAgent: Generates outfit visualizations
+- GroupChatOrchestrator: Coordinates multi-agent collaboration
 
-## Challenges
+### Tech Stack
+- Backend: FastAPI (Python 3.11+)
+- Frontend: Streamlit
+- AI: OpenAI GPT-4o-mini
+- Monitoring: Grafana + Prometheus
+- License: MIT
 
-- Reply: Multi-agent group conversation
-- Frasers: Next-gen retail engagement
-- Grafana: Monitoring integration
-- Theme: Fashion odyssey journey
+## Quick Start
 
-## Tech Stack
+```bash
+# Install dependencies
+pip install -r requirements.txt
 
-- FastAPI
-- Streamlit
-- OpenAI GPT-4
-- Python 3.11+
+# Set up environment
+cp .env.example .env
+# Add your OPENAI_API_KEY to .env
+
+# Terminal 1: Start API
+python -m src.api.main
+
+# Terminal 2: Start UI
+streamlit run frontend/streamlit_ui/app.py
+```
+
+Access at http://localhost:8501
+
+## Testing
+
+```bash
+pytest tests/
+python test_e2e.py
+```
+
+## Grafana Setup
+
+See `grafana/README.md` for monitoring setup.
+
+## Demo
+
+Sample wardrobe images available in `datasets/sample_images.md`
 
 ## License
 
