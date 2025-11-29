@@ -46,13 +46,20 @@ class GroupChatOrchestrator:
     
     async def _get_agent_response(self, agent_name: str, message: str, image_url: str = None) -> str:
         history = [{"role": m.sender, "content": m.content} for m in self.messages[-5:]]
+        context_note = ""
+        
+        if len(self.messages) > 1:
+            other_agents = [m.sender for m in self.messages[-3:] if m.sender not in ["User", agent_name]]
+            if other_agents:
+                context_note = f" (Building on insights from {', '.join(set(other_agents))})"
         
         if agent_name == "VisionAgent" and image_url:
             response = await analyze_wardrobe(image_url, message)
             self.wardrobe_context = response
-            return response
+            return response + context_note
         elif agent_name == "RecommendationAgent":
-            return await recommend_outfit(message, self.wardrobe_context)
+            response = await recommend_outfit(message, self.wardrobe_context)
+            return response + context_note
         elif agent_name == "ConversationAgent":
             return await generate_response(history, message)
         
