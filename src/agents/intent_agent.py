@@ -1,1 +1,21 @@
-# IntentAgent: Parses user requirements like event, mood, weather
+import os
+from openai import AsyncOpenAI
+
+client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+async def parse_intent(user_message: str) -> dict:
+    try:
+        response = await client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{
+                "role": "system",
+                "content": "Extract occasion, weather, style preference, formality from user request. Return JSON."
+            }, {
+                "role": "user",
+                "content": user_message
+            }],
+            max_tokens=150
+        )
+        return {"intent": response.choices[0].message.content, "raw": user_message}
+    except Exception as e:
+        return {"intent": "casual_outfit", "occasion": "general", "raw": user_message}
