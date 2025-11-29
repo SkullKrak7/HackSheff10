@@ -6,6 +6,7 @@ interface Message {
   sender: string;
   content: string;
   timestamp: Date;
+  imageBase64?: string;
 }
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -70,7 +71,8 @@ const MultiAgentChat: React.FC = () => {
         id: `${Date.now()}-${r.agent}`,
         sender: r.agent,
         content: r.message,
-        timestamp: new Date(r.time)
+        timestamp: new Date(r.time),
+        imageBase64: r.image_base64
       }));
 
       setMessages(prev => [...prev, ...agentMessages]);
@@ -175,6 +177,13 @@ const MultiAgentChat: React.FC = () => {
                 <div className="prose prose-sm max-w-none">
                   <ReactMarkdown>{msg.content}</ReactMarkdown>
                 </div>
+                {msg.imageBase64 && (
+                  <img 
+                    src={`data:image/jpeg;base64,${msg.imageBase64}`} 
+                    alt="Generated outfit" 
+                    className="mt-3 rounded-lg max-w-md w-full"
+                  />
+                )}
               </div>
             </div>
           </div>
