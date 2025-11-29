@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 import uvicorn
+from .routers import router as metrics_router
 
 app = FastAPI(title="RetailOdyssey", version="1.0.0")
 
@@ -13,6 +14,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(metrics_router, prefix="/api", tags=["metrics"])
 
 from ..agents.group_chat_orchestrator import GroupChatOrchestrator
 
