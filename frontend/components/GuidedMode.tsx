@@ -41,7 +41,7 @@ const GuidedMode: React.FC = () => {
     setStep(3);
 
     try {
-      // Step 1: Vision Agent analyzes wardrobe
+      // Step 1: Vision Agent analyzes wardrobe (only if image uploaded)
       if (uploadedImage) {
         const visionResponse = await fetch(`${API_URL}/api/chat`, {
           method: 'POST',
@@ -52,7 +52,8 @@ const GuidedMode: React.FC = () => {
           })
         });
         const visionData = await visionResponse.json();
-        setAgentMessages(prev => [...prev, ...visionData.responses]);
+        const visionAgents = visionData.responses.filter((r: any) => r.agent === 'VisionAgent');
+        setAgentMessages(prev => [...prev, ...visionAgents]);
         await new Promise(r => setTimeout(r, 1000));
       }
 
@@ -65,7 +66,8 @@ const GuidedMode: React.FC = () => {
         body: JSON.stringify({ message: recMessage })
       });
       const recData = await recResponse.json();
-      setAgentMessages(prev => [...prev, ...recData.responses]);
+      const recAgents = recData.responses.filter((r: any) => r.agent === 'RecommendationAgent');
+      setAgentMessages(prev => [...prev, ...recAgents]);
       await new Promise(r => setTimeout(r, 1000));
 
       // Step 3: Generate image
@@ -81,8 +83,6 @@ const GuidedMode: React.FC = () => {
       if (imageAgent?.image_base64) {
         setGeneratedImage(imageAgent.image_base64);
       }
-      
-      setAgentMessages(prev => [...prev, ...imgData.responses.filter((r: any) => r.agent !== 'ImageGenAgent')]);
       
     } catch (error) {
       console.error('Error:', error);
