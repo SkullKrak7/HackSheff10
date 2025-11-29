@@ -56,38 +56,53 @@ Multi-agent fashion recommendation system for HackSheffield10.
 
 ## Quick Start
 
+### Prerequisites
+- Python 3.11+
+- Docker (optional, for containerized deployment)
+- OpenAI API key
+
 ### Option 1: Docker (Recommended)
 ```bash
-# Set up environment
-cp .env.example .env
-# Add your OPENAI_API_KEY to .env
+# 1. Clone repository
+git clone https://github.com/SkullKrak7/HackSheff10.git
+cd HackSheff10
 
-# Start all services
+# 2. Set up environment
+cp .env.example .env
+# Edit .env and add your OPENAI_API_KEY
+
+# 3. Start all services
 docker-compose up -d
 
-# Access
+# 4. Access applications
 # - Streamlit UI: http://localhost:8501
-# - API: http://localhost:8000
+# - API Docs: http://localhost:8000/docs
 # - Grafana: http://localhost:3000
 ```
 
 ### Option 2: Local Development
 ```bash
-# Install dependencies
+# 1. Clone repository
+git clone https://github.com/SkullKrak7/HackSheff10.git
+cd HackSheff10
+
+# 2. Install dependencies
 pip install -r requirements.txt
 
-# Set up environment
+# 3. Set up environment
 cp .env.example .env
-# Add your OPENAI_API_KEY to .env
+# Edit .env and add your OPENAI_API_KEY
 
-# Terminal 1: Start API
+# 4. Start API (Terminal 1)
 python -m src.api.main
 
-# Terminal 2: Start UI
+# 5. Start UI (Terminal 2)
 streamlit run frontend/streamlit_ui/app.py
-```
 
-Access at http://localhost:8501
+# 6. Access
+# - Streamlit UI: http://localhost:8501
+# - API Docs: http://localhost:8000/docs
+```
 
 ## Testing
 
