@@ -1,1 +1,42 @@
-# App Entry: FastAPI server startup and configuration for full agent system
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import Optional
+import uvicorn
+
+app = FastAPI(title="RetailOdyssey", version="1.0.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+from ..agents.group_chat_orchestrator import GroupChatOrchestrator
+
+orchestrator = GroupChatOrchestrator()
+
+class ChatRequest(BaseModel):
+    message: str
+    image_url: Optional[str] = None
+
+@app.post("/api/chat")
+async def chat(request: ChatRequest):
+    responses = await orchestrator.process_message(request.message, request.image_url)
+    return {
+        "responses": [{"agent": r.sender, "message": r.content, "time": r.timestamp.isoformat()} for r in responses],
+        "conversation": orchestrator.get_conversation_history()
+    }
+
+@app.get("/api/history")
+async def get_history():
+    return {"conversation": orchestrator.get_conversation_history()}
+
+@app.get("/api/health")
+async def health():
+    return {"status": "healthy", "agents": ["VisionAgent", "RecommendationAgent", "ConversationAgent"]}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
