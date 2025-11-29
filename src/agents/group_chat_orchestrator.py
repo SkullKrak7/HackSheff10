@@ -40,11 +40,14 @@ class GroupChatOrchestrator:
         agents = []
         msg_lower = message.lower()
         
-        if has_image or "wardrobe" in msg_lower or "clothes" in msg_lower:
+        if has_image or any(word in msg_lower for word in ["wardrobe", "clothes", "picture", "image", "wearing", "outfit"]):
             agents.append("VisionAgent")
         if "recommend" in msg_lower or "suggest" in msg_lower or "wear" in msg_lower:
             agents.append("RecommendationAgent")
         if not agents:
+            agents.append("ConversationAgent")
+        
+        return agents
             agents.append("ConversationAgent")
         
         return agents

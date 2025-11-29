@@ -12,6 +12,8 @@ st.markdown("*Your AI Fashion Journey*")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
+if "current_image" not in st.session_state:
+    st.session_state.current_image = None
 
 with st.sidebar:
     st.header("Challenge Targets")
@@ -46,9 +48,13 @@ if prompt := st.chat_input("Ask about outfit recommendations..."):
         st.markdown(prompt)
     
     try:
+        payload = {"message": prompt}
+        if st.session_state.current_image:
+            payload["image_url"] = st.session_state.current_image
+            
         response = requests.post(
             f"{API_URL}/api/chat",
-            json={"message": prompt},
+            json=payload,
             timeout=30
         )
         
@@ -75,16 +81,17 @@ col1, col2 = st.columns([2, 1])
 
 with col1:
     uploaded_file = st.file_uploader("Upload wardrobe image", type=["jpg", "jpeg", "png"])
+    if uploaded_file:
+        img_b64 = base64.b64encode(uploaded_file.getvalue()).decode()
+        st.session_state.current_image = f"data:image/jpeg;base64,{img_b64}"
+        st.success("Image uploaded! Now ask questions about it.")
+        
     if uploaded_file and st.button("Analyze Wardrobe"):
         with st.spinner("Analyzing wardrobe..."):
-            files = {"file": uploaded_file.getvalue()}
-            img_b64 = base64.b64encode(uploaded_file.getvalue()).decode()
-            img_url = f"data:image/jpeg;base64,{img_b64}"
-            
             try:
                 response = requests.post(
                     f"{API_URL}/api/chat",
-                    json={"message": "Analyze my wardrobe", "image_url": img_url},
+                    json={"message": "Analyze my wardrobe", "image_url": st.session_state.current_image},
                     timeout=30
                 )
                 if response.status_code == 200:
