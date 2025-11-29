@@ -18,7 +18,7 @@ async def generate_outfit_image(description: str) -> str:
         return "demo_mode:Image generation requires Gemini API key"
     
     try:
-        model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        model = genai.GenerativeModel('gemini-1.5-pro')
         
         prompt = f"""Generate a professional fashion photograph showing: {description}
         
