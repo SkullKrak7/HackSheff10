@@ -20,7 +20,7 @@ export const analyzeClothingImage = async (base64Image: string): Promise<string>
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        message: 'Analyze this wardrobe image',
+        message: 'Analyze this wardrobe image in detail',
         image_url: base64Image
       })
     });
@@ -35,7 +35,7 @@ export const analyzeClothingImage = async (base64Image: string): Promise<string>
 
 export const analyzeUserIntent = async (prefs: UserPreferences): Promise<string> => {
   try {
-    const message = `I need outfit advice for: Event: ${prefs.event}, Budget: ${prefs.budget}, Mood: ${prefs.mood}, Presentation: ${prefs.presentation}, Weather: ${prefs.weather}, Colors: ${prefs.colorPreference}`;
+    const message = `Analyze my style intent: I'm going to a ${prefs.event}, want to be perceived as ${prefs.presentation}, feeling ${prefs.mood}, weather is ${prefs.weather}, budget ${prefs.budget}, prefer colors that ${prefs.colorPreference}. What's my style strategy?`;
     
     const response = await fetch(`${API_URL}/api/chat`, {
       method: 'POST',
@@ -43,7 +43,7 @@ export const analyzeUserIntent = async (prefs: UserPreferences): Promise<string>
       body: JSON.stringify({ message })
     });
     const data = await response.json();
-    const intentResponse = data.responses?.find((r: any) => r.agent === 'ConversationAgent');
+    const intentResponse = data.responses?.[0];
     return intentResponse?.message || "Could not determine intent.";
   } catch (error) {
     console.error("Intent Agent Error:", error);
@@ -56,7 +56,7 @@ export const generateRecommendations = async (
   intentAnalysis: string
 ): Promise<{ text: string; chunks: GroundingChunk[] }> => {
   try {
-    const message = `Based on my wardrobe (${visionAnalysis}) and my needs (${intentAnalysis}), recommend a complete outfit.`;
+    const message = `Recommend a complete outfit. My wardrobe: ${visionAnalysis.substring(0, 200)}. My needs: ${intentAnalysis.substring(0, 200)}. Give me specific recommendations.`;
     
     const response = await fetch(`${API_URL}/api/chat`, {
       method: 'POST',
@@ -77,12 +77,12 @@ export const generateRecommendations = async (
 
 export const generateOutfitVisual = async (description: string): Promise<string | null> => {
   try {
+    const message = `Generate a visual image of this outfit: ${description.substring(0, 300)}`;
+    
     const response = await fetch(`${API_URL}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        message: `Generate an image of this outfit: ${description}` 
-      })
+      body: JSON.stringify({ message })
     });
     const data = await response.json();
     const imageResponse = data.responses?.find((r: any) => r.agent === 'ImageGenAgent');

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { AgentMessage } from '../types';
 
 interface AgentChatProps {
@@ -77,7 +78,9 @@ const AgentChat: React.FC<AgentChatProps> = ({ messages }) => {
                   <div className="w-2.5 h-2.5 bg-current rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                 </div>
               ) : (
-                 <p className="text-base leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                 <div className="text-base leading-relaxed prose prose-sm max-w-none">
+                   <ReactMarkdown>{msg.content}</ReactMarkdown>
+                 </div>
               )}
             </div>
           </div>
