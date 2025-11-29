@@ -4,7 +4,6 @@ from typing import List, Dict
 from datetime import datetime
 from .vision_agent import analyze_wardrobe
 from .recommendation_agent import recommend_outfit
-from .intent_agent import parse_intent
 from .conversation_agent import generate_response
 from .imagegen_agent import generate_outfit_image
 from ..utils.prometheus_metrics import agent_calls, total_requests, response_time
@@ -26,10 +25,6 @@ class GroupChatOrchestrator:
         
         relevant_agents = self._identify_relevant_agents(user_message, image_url)
         
-        # Auto-add ImageGenAgent if RecommendationAgent is triggered
-        if "RecommendationAgent" in relevant_agents and "ImageGenAgent" not in relevant_agents:
-            relevant_agents.append("ImageGenAgent")
-        
         responses = []
         for agent_name in relevant_agents:
             response = await self._get_agent_response(agent_name, user_message, image_url)
@@ -43,13 +38,20 @@ class GroupChatOrchestrator:
         agents = []
         msg_lower = message.lower()
         
-        if has_image or any(word in msg_lower for word in ["wardrobe", "clothes", "picture", "image", "wearing", "outfit"]):
+        # VisionAgent for image analysis
+        if has_image:
             agents.append("VisionAgent")
-        if "recommend" in msg_lower or "suggest" in msg_lower or "wear" in msg_lower:
+        
+        # RecommendationAgent for outfit suggestions
+        if any(word in msg_lower for word in ["recommend", "suggest", "outfit", "wear", "style", "look"]):
             agents.append("RecommendationAgent")
-        if any(word in msg_lower for word in ["generate", "create", "show", "visualize", "visual"]):
+        
+        # ImageGenAgent for image generation
+        if any(word in msg_lower for word in ["generate", "create", "show", "visualize", "image", "picture"]):
             agents.append("ImageGenAgent")
-        if not agents:
+        
+        # Always include ConversationAgent for natural dialogue
+        if "ConversationAgent" not in agents:
             agents.append("ConversationAgent")
         
         return agents
@@ -58,7 +60,7 @@ class GroupChatOrchestrator:
         start_time = time.time()
         agent_calls.labels(agent_name=agent_name).inc()
         
-        history = [{"role": m.sender, "content": m.content} for m in self.messages[-5:]]
+        history = [{"role": m.sender, "content": m.content} for m in self.messages[-10:]]
         
         result = ""
         if agent_name == "VisionAgent" and image_url:
@@ -83,3 +85,7 @@ class GroupChatOrchestrator:
     def get_conversation_history(self) -> List[Dict]:
         return [{"sender": m.sender, "content": m.content, "time": m.timestamp.isoformat()} 
                 for m in self.messages]
+    
+    def clear_history(self):
+        self.messages = []
+        self.wardrobe_context = ""

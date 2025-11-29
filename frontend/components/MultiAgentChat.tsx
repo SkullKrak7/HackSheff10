@@ -117,12 +117,28 @@ const MultiAgentChat: React.FC = () => {
             <h1 className="text-3xl font-bold">StyleSense AI</h1>
             <p className="text-blue-100 mt-1">Multi-Agent Fashion Assistant</p>
           </div>
-          <button
-            onClick={() => setShowBrands(!showBrands)}
-            className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition"
-          >
-            🛍️ Shop Frasers
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                setMessages([{
+                  id: '0',
+                  sender: 'System',
+                  content: 'Chat cleared! Ask me anything about fashion.',
+                  timestamp: new Date()
+                }]);
+                setUploadedImage(null);
+              }}
+              className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition"
+            >
+              🔄 New Chat
+            </button>
+            <button
+              onClick={() => setShowBrands(!showBrands)}
+              className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition"
+            >
+              🛍️ Shop Frasers
+            </button>
+          </div>
         </div>
       </div>
 

@@ -1,29 +1,42 @@
 import os
-from dotenv import load_dotenv
 from openai import AsyncOpenAI
 
-load_dotenv()
-key = os.getenv("OPENAI_API_KEY")
-if key:
-    os.environ["OPENAI_API_KEY"] = key
+_client = None
 
 def get_client():
-    return AsyncOpenAI(api_key=key)
+    global _client
+    if _client is None:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if api_key:
+            _client = AsyncOpenAI(api_key=api_key)
+    return _client
 
 async def generate_response(conversation_history: list, user_message: str) -> str:
-    if not key:
-        return "ConversationAgent: How can I help with your outfit today? (demo mode)"
+    client = get_client()
+    
+    if not client:
+        return "I'm here to help with fashion advice! Ask me anything about outfits, style, or trends. (demo mode)"
+    
     try:
-        client = get_client()
-        messages = [{"role": "system", "content": "You are a fashion assistant in a group chat with other AI agents."}]
-        messages.extend(conversation_history[-5:])
-        messages.append({"role": "user", "content": user_message})
+        messages = [
+            {
+                "role": "system",
+                "content": "You are a friendly fashion assistant in a multi-agent chat. Help users with outfit advice, style tips, and fashion recommendations. Be conversational, helpful, and build on what other agents say."
+            }
+        ]
+        
+        # Add conversation history
+        for msg in conversation_history[-10:]:
+            role = "assistant" if msg["role"] != "User" else "user"
+            messages.append({"role": role, "content": msg["content"]})
         
         response = await client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
-            max_tokens=150
+            max_tokens=300,
+            temperature=0.7
         )
+        
         return response.choices[0].message.content
     except Exception as e:
-        return f"ConversationAgent: How can I help? (error: {str(e)[:50]})"
+        return f"I'm here to help with fashion! (error: {str(e)[:50]})"
