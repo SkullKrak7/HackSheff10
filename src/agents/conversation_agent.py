@@ -25,7 +25,6 @@ async def generate_response(conversation_history: list, user_message: str) -> st
             }
         ]
         
-        # Add conversation history
         for msg in conversation_history[-10:]:
             role = "assistant" if msg["role"] != "User" else "user"
             messages.append({"role": role, "content": msg["content"]})
@@ -33,7 +32,6 @@ async def generate_response(conversation_history: list, user_message: str) -> st
         response = await client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
-            max_tokens=300,
             temperature=0.7
         )
         
