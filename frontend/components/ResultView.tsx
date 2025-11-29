@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import { OutfitResult } from '../types';
 
 interface ResultViewProps {
@@ -39,8 +40,8 @@ const ResultView: React.FC<ResultViewProps> = ({ outfit, onReset }) => {
                <span className="bg-primary/10 text-primary text-sm font-bold px-4 py-1.5 rounded-full uppercase tracking-wider">Final Recommendation</span>
             </div>
             <h2 className="text-5xl font-serif text-gray-900 mb-8 leading-tight">Your Curated Look</h2>
-            <div className="prose prose-xl text-gray-600 leading-relaxed whitespace-pre-line">
-              {outfit.recommendationText}
+            <div className="prose prose-lg text-gray-600 leading-relaxed max-w-none">
+              <ReactMarkdown>{outfit.recommendationText}</ReactMarkdown>
             </div>
           </div>
 
