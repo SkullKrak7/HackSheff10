@@ -21,7 +21,15 @@ async def generate_outfit_image(description: str) -> str:
         return "demo_mode:Image generation requires Gemini API key"
     
     try:
-        prompt = f"Professional fashion photography: {description}. Studio lighting, neutral background, high quality, detailed clothing."
+        prompt = f"""Professional fashion photography of a mannequin wearing: {description}
+
+CRITICAL REQUIREMENTS:
+- MUST show a full-body mannequin (not a person)
+- Mannequin should be white/neutral colored
+- Studio lighting with clean white or light gray background
+- High quality, detailed clothing visible
+- Fashion retail display style
+- 3:4 portrait orientation"""
         
         response = client.models.generate_content(
             model="gemini-3-pro-image-preview",

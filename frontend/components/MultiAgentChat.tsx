@@ -110,13 +110,10 @@ const MultiAgentChat: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen max-w-6xl mx-auto">
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 shadow-lg">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold">StyleSense AI</h1>
-            <p className="text-blue-100 mt-1">Multi-Agent Fashion Assistant</p>
-          </div>
+    <div className="flex flex-col h-[calc(100vh-80px)]">
+      <div className="bg-white border-b shadow-sm p-4">
+        <div className="max-w-6xl mx-auto flex justify-between items-center">
+          <p className="text-gray-600">Chat with AI fashion agents - they collaborate in real-time</p>
           <div className="flex gap-2">
             <button
               onClick={() => {
@@ -128,13 +125,13 @@ const MultiAgentChat: React.FC = () => {
                 }]);
                 setUploadedImage(null);
               }}
-              className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition"
+              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition text-sm"
             >
               🔄 New Chat
             </button>
             <button
               onClick={() => setShowBrands(!showBrands)}
-              className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition"
+              className="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition text-sm"
             >
               🛍️ Shop Frasers
             </button>
@@ -161,7 +158,7 @@ const MultiAgentChat: React.FC = () => {
         </div>
       )}
 
-      <div className="flex-1 bg-gray-50 overflow-y-auto p-6 space-y-4">
+      <div className="flex-1 bg-gray-50 overflow-y-auto p-6 space-y-4 max-w-6xl mx-auto w-full">
         {messages.map((msg) => (
           <div
             key={msg.id}
@@ -197,6 +194,7 @@ const MultiAgentChat: React.FC = () => {
       </div>
 
       <div className="bg-white border-t shadow-lg p-4">
+        <div className="max-w-6xl mx-auto">
         {uploadedImage && (
           <div className="mb-3 relative inline-block">
             <img src={uploadedImage} alt="Upload" className="h-20 rounded-lg border-2 border-blue-200" />
@@ -242,6 +240,7 @@ const MultiAgentChat: React.FC = () => {
         <p className="text-xs text-gray-500 mt-2 text-center">
           Powered by OpenAI GPT-4 • Multi-Agent Collaboration
         </p>
+        </div>
       </div>
     </div>
   );
