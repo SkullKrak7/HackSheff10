@@ -1,34 +1,31 @@
 import os
 import base64
 import io
-from google import genai
+import google.generativeai as genai
 
-_client = None
+_configured = False
 
-def get_client():
-    global _client
-    if _client is None:
+def configure_genai():
+    global _configured
+    if not _configured:
         api_key = os.getenv("GEMINI_API_KEY")
         if api_key:
-            _client = genai.Client(api_key=api_key)
-    return _client
+            genai.configure(api_key=api_key)
+            _configured = True
+    return _configured
 
 async def generate_outfit_image(description: str) -> str:
-    client = get_client()
-    
-    if not client:
+    if not configure_genai():
         return ""
     
     try:
-        prompt = f"Professional fashion photography of a mannequin wearing: {description}. Studio lighting, neutral background, fashion retail display style."
+        prompt = f"Professional fashion photography of a mannequin wearing: {description}. Studio lighting, neutral background."
         
-        response = client.models.generate_content(
-            model="gemini-2.5-flash-image",
-            contents=[prompt]
-        )
+        model = genai.GenerativeModel("gemini-2.0-flash-exp")
+        response = model.generate_content(prompt)
         
         for part in response.parts:
-            if part.inline_data is not None:
+            if hasattr(part, 'inline_data') and part.inline_data:
                 image = part.as_image()
                 buffered = io.BytesIO()
                 image.save(buffered, format="JPEG")
