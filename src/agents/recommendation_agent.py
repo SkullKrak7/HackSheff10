@@ -27,27 +27,37 @@ def get_openai_client():
 
 async def recommend_outfit(user_request: str, wardrobe_context: str = "") -> str:
     """
-    Recommend outfit using Gemini (FREE) or fallback to OpenAI
+    Recommend outfit using Gemini with Frasers Group focus
     """
-    # Try Gemini first (FREE tier)
     if configure_gemini():
         try:
             model = genai.GenerativeModel("gemini-2.0-flash-exp")
             
-            prompt = f"""You're a fashion stylist. Based on the context, suggest a specific outfit.
+            prompt = f"""You're a fashion stylist for Frasers Group. Recommend outfits and tell users which Frasers brand to shop at:
 
-{user_request}
+**Frasers Group Brands:**
+- **Sports Direct** (sportswear, activewear, casual) - sportsdirect.com
+- **House of Fraser** (premium fashion, formal wear) - houseoffraser.co.uk  
+- **Flannels** (luxury designer brands) - flannels.com
+- **USC** (streetwear, youth fashion) - usc.co.uk
+- **Jack Wills** (British heritage, preppy style) - jackwills.com
 
-Wardrobe available: {wardrobe_context if wardrobe_context else "No wardrobe info provided"}
+**User Request:** {user_request}
+**Available Wardrobe:** {wardrobe_context if wardrobe_context else "None"}
 
-Give a concise outfit suggestion (200 words max) with main pieces and why it works."""
+**Your Response Must Include:**
+1. 2-3 outfit items
+2. Which Frasers brand to buy each item from (be specific!)
+3. Why it works
+
+Keep under 150 words. Always mention at least 2 Frasers brands."""
             
             response = model.generate_content(
                 prompt,
                 generation_config={
                     "temperature": 0.7,
                     "top_p": 0.95,
-                    "max_output_tokens": 1024,
+                    "max_output_tokens": 512,
                 }
             )
             return response.text
