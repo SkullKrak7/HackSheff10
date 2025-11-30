@@ -5,7 +5,6 @@ from typing import Optional
 import uvicorn
 from dotenv import load_dotenv
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
-from .routers import router as metrics_router
 from ..utils.prometheus_metrics import user_sessions, messages_per_session
 
 load_dotenv()
@@ -19,8 +18,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-app.include_router(metrics_router, prefix="/api", tags=["metrics"])
 
 from ..agents.group_chat_orchestrator import GroupChatOrchestrator
 
