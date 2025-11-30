@@ -29,7 +29,7 @@ async def generate_response(conversation_history: list, user_message: str) -> st
     # Try Gemini first (FREE tier)
     if configure_gemini():
         try:
-            model = genai.GenerativeModel("gemini-2.0-flash-exp")
+            model = genai.GenerativeModel("gemini-3-pro-preview")
             
             # Build conversation context
             context = "You're a fashion assistant helping the user. Read the full conversation and respond naturally to continue helping them. Build on what's already been discussed.\n\n"

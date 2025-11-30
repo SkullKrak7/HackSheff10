@@ -40,7 +40,7 @@ async def parse_intent(user_message: str, conversation_history: List[Dict] = Non
     # Try Gemini first (FREE tier)
     if configure_gemini():
         try:
-            model = genai.GenerativeModel("gemini-2.0-flash-exp")
+            model = genai.GenerativeModel("gemini-3-pro-preview")
             
             context = ""
             if conversation_history:

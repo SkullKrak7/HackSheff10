@@ -31,7 +31,7 @@ async def recommend_outfit(user_request: str, wardrobe_context: str = "") -> str
     """
     if configure_gemini():
         try:
-            model = genai.GenerativeModel("gemini-2.0-flash-exp")
+            model = genai.GenerativeModel("gemini-3-pro-preview")
             
             prompt = f"""You're a fashion stylist for Frasers Group. Recommend outfits and tell users which Frasers brand to shop at:
 

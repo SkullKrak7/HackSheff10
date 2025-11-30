@@ -26,7 +26,7 @@ async def generate_outfit_image(description: str) -> str:
         print(f"ImageGenAgent: Generating image...")
         
         response = client.models.generate_content(
-            model="gemini-2.5-flash-image",
+            model="gemini-3-pro-image-preview",
             contents={"parts": [{"text": prompt}]}
         )
         

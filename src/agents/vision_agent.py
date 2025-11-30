@@ -48,7 +48,7 @@ async def analyze_wardrobe(image_url: str, context: str = "") -> str:
                 img = Image.open(BytesIO(response.content))
             
             # Use Gemini 2.0 Flash for vision (FREE)
-            model = genai.GenerativeModel("gemini-2.0-flash-exp")
+            model = genai.GenerativeModel("gemini-3-pro-preview")
             
             prompt = f"Analyze this wardrobe/outfit image. Describe the clothing items, colors, style, and how they work together. Be specific. {context}"
             
