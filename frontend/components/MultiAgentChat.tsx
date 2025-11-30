@@ -17,6 +17,12 @@ interface Product {
   url?: string;
 }
 
+interface JourneyStop {
+  destination: string;
+  time: string;
+  outfit?: string;
+}
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 const FRASERS_BRANDS = [
@@ -45,6 +51,8 @@ const MultiAgentChat: React.FC = () => {
   const [showBrands, setShowBrands] = useState(false);
   const [wishlist, setWishlist] = useState<Product[]>([]);
   const [showWishlist, setShowWishlist] = useState(false);
+  const [journey, setJourney] = useState<JourneyStop[]>([]);
+  const [showTimeline, setShowTimeline] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -54,6 +62,13 @@ const MultiAgentChat: React.FC = () => {
 
   const handleSend = async () => {
     if (!input.trim()) return;
+
+    // Extract journey destinations from user input
+    const newStops = extractJourneyStops(input);
+    if (newStops.length > 0) {
+      setJourney(prev => [...prev, ...newStops]);
+      setShowTimeline(true);
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -152,6 +167,29 @@ const MultiAgentChat: React.FC = () => {
     }, 0).toFixed(2);
   };
 
+  const extractJourneyStops = (text: string): JourneyStop[] => {
+    const stops: JourneyStop[] = [];
+    const patterns = [
+      /(?:going to|heading to|visiting|at the|for (?:a|an|the)) ([a-z\s]+?)(?:\.|,|;|\s+(?:and|then|after))/gi,
+      /destination[s]?:?\s*([a-z\s,]+)/gi
+    ];
+    
+    patterns.forEach(pattern => {
+      let match;
+      while ((match = pattern.exec(text)) !== null) {
+        const dest = match[1].trim();
+        if (dest.length > 3 && dest.length < 30) {
+          stops.push({
+            destination: dest.charAt(0).toUpperCase() + dest.slice(1),
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          });
+        }
+      }
+    });
+    
+    return stops;
+  };
+
   const getAgentColor = (sender: string) => {
     if (sender === 'You') return 'bg-blue-500 text-white';
     if (sender === 'System') return 'bg-gray-200 text-gray-700';
@@ -184,6 +222,8 @@ const MultiAgentChat: React.FC = () => {
                   timestamp: new Date()
                 }]);
                 setUploadedImage(null);
+                setJourney([]);
+                setShowTimeline(false);
               }}
               className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition text-sm"
             >
@@ -195,6 +235,14 @@ const MultiAgentChat: React.FC = () => {
             >
               🛒 Cart {wishlist.length > 0 && `(${wishlist.length})`}
             </button>
+            {journey.length > 0 && (
+              <button
+                onClick={() => setShowTimeline(!showTimeline)}
+                className="px-4 py-2 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded-lg transition text-sm"
+              >
+                🗺️ Journey ({journey.length})
+              </button>
+            )}
             <button
               onClick={() => setShowBrands(!showBrands)}
               className="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition text-sm"
@@ -274,6 +322,33 @@ const MultiAgentChat: React.FC = () => {
                 </div>
               </>
             )}
+          </div>
+        </div>
+      )}
+
+      {showTimeline && journey.length > 0 && (
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 border-b shadow-sm p-4">
+          <div className="max-w-6xl mx-auto">
+            <h3 className="font-semibold text-gray-700 mb-4">🗺️ Your Style Odyssey Timeline</h3>
+            <div className="relative">
+              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-purple-300"></div>
+              <div className="space-y-4">
+                {journey.map((stop, idx) => (
+                  <div key={idx} className="relative pl-10 animate-fadeIn" style={{ animationDelay: `${idx * 100}ms` }}>
+                    <div className="absolute left-2 w-4 h-4 bg-purple-500 rounded-full border-2 border-white shadow"></div>
+                    <div className="bg-white rounded-lg p-3 shadow-sm">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-semibold text-purple-900">{stop.destination}</p>
+                          {stop.outfit && <p className="text-xs text-gray-600 mt-1">{stop.outfit}</p>}
+                        </div>
+                        <span className="text-xs text-gray-500">{stop.time}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}
