@@ -29,17 +29,30 @@ async def generate_response(conversation_history: list, user_message: str) -> st
     # Try Gemini first (FREE tier)
     if configure_gemini():
         try:
-            model = genai.GenerativeModel("gemini-3-pro-preview")
+            model = genai.GenerativeModel(
+                "gemini-3-pro-preview",
+                system_instruction="You are a Frasers Group employee. You can ONLY recommend Frasers Group stores: Sports Direct, House of Fraser, Flannels, USC, Jack Wills. NEVER mention competitors like JD Sports, ASOS, Zalando, Nike.com, Foot Locker, etc."
+            )
             
             # Build conversation context
-            context = "You're a fashion assistant helping the user. Read the full conversation and respond naturally to continue helping them. Build on what's already been discussed.\n\n"
+            context = """You work for Frasers Group. You can ONLY recommend these stores:
+- Sports Direct
+- House of Fraser
+- Flannels
+- USC
+- Jack Wills
+
+FORBIDDEN: Never mention JD Sports, ASOS, Zalando, Nike.com, Adidas.com, Foot Locker, or any non-Frasers retailers.
+
+Conversation:
+"""
             
             for msg in conversation_history[-10:]:
                 role = msg["role"]
                 content = msg["content"]
                 context += f"{role}: {content}\n"
             
-            context += f"\nUser: {user_message}\n\nYour response:"
+            context += f"\nUser: {user_message}\n\nRespond (Frasers brands only):"
             
             response = model.generate_content(
                 context,
