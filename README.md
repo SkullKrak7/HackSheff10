@@ -10,13 +10,45 @@ A multi-agent AI system that guides users through their daily fashion odyssey, p
 
 ## 🎯 HackSheffield10 Challenges
 
-This project addresses **5 different challenges**:
+This project addresses **5 sponsor challenges**:
 
-1. 🏆 **Reply AI Agents Challenge** - Multi-agent collaboration with context sharing
-2. 🏆 **Frasers Group Challenge** - Real product recommendations from Frasers brands
-3. 🏆 **Grafana Challenge** - Real-time monitoring dashboard
-4. 🏆 **Arm Challenge** - Optimized for Raspberry Pi & Apple Silicon
-5. 🏆 **Best Theme (Odyssey)** - Journey-based fashion guidance
+### 1. 🏆 **Reply AI Agents Challenge**
+**"Multi-Agent Group Conversation Design"**
+- 5 specialized AI agents collaborating in group chat
+- Context sharing across 20 messages
+- Targeted intent recognition (IntentAgent)
+- Asynchronous interaction between agents
+- **Prize:** Apple AirPods (1st), AirTags (2nd), Reply Backpacks (3rd)
+
+### 2. 🏆 **Frasers Group Challenge**
+**"Next-Gen Retail Engagement"**
+- Digital experience attracting next-gen customers
+- Real product search from Frasers websites
+- Shopping cart with purchase CTAs
+- Competitor filtering (25+ brands blocked)
+- Brand loyalty tracking
+- **Prize:** £100 Sports Direct gift card per person
+
+### 3. 🏆 **Grafana Challenge**
+- Real-time monitoring dashboard
+- Business metrics (brand mentions, competitor blocks, sessions)
+- Agent performance tracking
+- Prometheus integration
+- **Prize:** TBD
+
+### 4. 🏆 **Arm Challenge**
+- ARM64 native support
+- Raspberry Pi 4/5 optimized
+- Apple Silicon compatible
+- Multi-platform Docker images
+- **Prize:** TBD
+
+### 5. 🏆 **Best Theme: Odyssey**
+- Journey timeline visualization
+- Multi-destination outfit planning
+- Context-aware styling
+- "Style Odyssey" narrative
+- **Prize:** TBD
 
 ## 🤖 The 5 AI Agents
 
