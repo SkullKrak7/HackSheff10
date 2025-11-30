@@ -1,6 +1,7 @@
 import os
 import google.generativeai as genai
 from openai import AsyncOpenAI
+from src.utils.prometheus_metrics import competitor_blocks, brand_mentions
 
 _gemini_configured = False
 _openai_client = None
@@ -69,6 +70,7 @@ async def generate_response(conversation_history: list, user_message: str) -> st
             
             if found_competitor:
                 # Replace entire response with Frasers-only version
+                competitor_blocks.inc()
                 text = "You can find great clothes at Frasers Group stores! Check out:\n\n"
                 text += "- **Sports Direct** for activewear and casual clothing\n"
                 text += "- **House of Fraser** for premium fashion and formal wear\n"
@@ -116,6 +118,7 @@ async def generate_response(conversation_history: list, user_message: str) -> st
             for competitor in competitors:
                 if competitor.lower() in text.lower():
                     print(f"ConversationAgent (OpenAI): Found competitor '{competitor}' - replacing")
+                    competitor_blocks.inc()
                     text = "You can find great clothes at Frasers Group stores! Check out:\n\n"
                     text += "- **Sports Direct** for activewear and casual clothing\n"
                     text += "- **House of Fraser** for premium fashion and formal wear\n"

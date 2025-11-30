@@ -6,6 +6,7 @@ import uvicorn
 from dotenv import load_dotenv
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 from .routers import router as metrics_router
+from ..utils.prometheus_metrics import user_sessions, messages_per_session
 
 load_dotenv()
 
@@ -24,6 +25,7 @@ app.include_router(metrics_router, prefix="/api", tags=["metrics"])
 from ..agents.group_chat_orchestrator import GroupChatOrchestrator
 
 orchestrator = GroupChatOrchestrator()
+session_message_count = 0
 
 class ChatRequest(BaseModel):
     message: str
@@ -31,6 +33,9 @@ class ChatRequest(BaseModel):
 
 @app.post("/api/chat")
 async def chat(request: ChatRequest):
+    global session_message_count
+    session_message_count += 1
+    
     agent_conversation = await orchestrator.process_message(request.message, request.image_url)
     
     return {
@@ -44,7 +49,15 @@ async def get_history():
 
 @app.post("/api/clear")
 async def clear_history():
+    global session_message_count
+    
+    # Track session metrics
+    if session_message_count > 0:
+        messages_per_session.observe(session_message_count)
+        user_sessions.inc()
+    
     orchestrator.clear_history()
+    session_message_count = 0
     return {"status": "cleared"}
 
 @app.get("/api/health")
