@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 import google.generativeai as genai
 from openai import AsyncOpenAI
+from src.utils.prometheus_metrics import brand_mentions, product_recommendations
 
 load_dotenv()
 
@@ -74,6 +75,18 @@ Keep response under 150 words."""
             )
             
             text = response.text
+            
+            # Track Frasers brand mentions
+            frasers_brands = ['Sports Direct', 'House of Fraser', 'Flannels', 'USC', 'Jack Wills']
+            for brand in frasers_brands:
+                if brand.lower() in text.lower():
+                    brand_mentions.labels(brand_name=brand).inc()
+            
+            # Track product recommendations (rough estimate by counting price mentions)
+            import re
+            price_count = len(re.findall(r'[£€$]\d+', text))
+            if price_count > 0:
+                product_recommendations.inc(price_count)
             
             # Check if grounding found Frasers products
             has_frasers_links = False

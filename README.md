@@ -10,13 +10,45 @@ A multi-agent AI system that guides users through their daily fashion odyssey, p
 
 ## 🎯 HackSheffield10 Challenges
 
-This project addresses **5 different challenges**:
+This project addresses **5 sponsor challenges**:
 
-1. 🏆 **Reply AI Agents Challenge** - Multi-agent collaboration with context sharing
-2. 🏆 **Frasers Group Challenge** - Real product recommendations from Frasers brands
-3. 🏆 **Grafana Challenge** - Real-time monitoring dashboard
-4. 🏆 **Arm Challenge** - Optimized for Raspberry Pi & Apple Silicon
-5. 🏆 **Best Theme (Odyssey)** - Journey-based fashion guidance
+### 1. 🏆 **Reply AI Agents Challenge**
+**"Multi-Agent Group Conversation Design"**
+- 5 specialized AI agents collaborating in group chat
+- Context sharing across 20 messages
+- Targeted intent recognition (IntentAgent)
+- Asynchronous interaction between agents
+- **Prize:** Apple AirPods (1st), AirTags (2nd), Reply Backpacks (3rd)
+
+### 2. 🏆 **Frasers Group Challenge**
+**"Next-Gen Retail Engagement"**
+- Digital experience attracting next-gen customers
+- Real product search from Frasers websites
+- Shopping cart with purchase CTAs
+- Competitor filtering (25+ brands blocked)
+- Brand loyalty tracking
+- **Prize:** £100 Sports Direct gift card per person
+
+### 3. 🏆 **Grafana Challenge**
+- Real-time monitoring dashboard
+- Business metrics (brand mentions, competitor blocks, sessions)
+- Agent performance tracking
+- Prometheus integration
+- **Prize:** TBD
+
+### 4. 🏆 **Arm Challenge**
+- ARM64 native support
+- Raspberry Pi 4/5 optimized
+- Apple Silicon compatible
+- Multi-platform Docker images
+- **Prize:** TBD
+
+### 5. 🏆 **Best Theme: Odyssey**
+- Journey timeline visualization
+- Multi-destination outfit planning
+- Context-aware styling
+- "Style Odyssey" narrative
+- **Prize:** TBD
 
 ## 🤖 The 5 AI Agents
 
@@ -82,23 +114,46 @@ npm run dev
 
 ## 📊 Grafana Monitoring
 
+**Access:** http://localhost:3000 (admin/admin)
+
 Real-time metrics dashboard showing:
 - Total requests processed
-- Agent call distribution
+- Agent call distribution  
 - Response time per agent
 - Requests per minute
+- Brand mentions tracking
+- Competitor blocks count
 
-See [GRAFANA_SETUP.md](GRAFANA_SETUP.md) for details.
+**Metrics Endpoint:** http://localhost:8000/metrics
 
-## 🥧 Raspberry Pi Deployment
+## 🥧 Raspberry Pi / ARM Deployment
 
-Optimized for ARM architecture (Pi 4/5, Apple Silicon):
+### Quick Setup (Pi 4/5 or Apple Silicon)
 
 ```bash
+# 1. Install Docker (if needed)
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+
+# 2. Clone and run
+git clone https://github.com/SkullKrak7/HackSheff10.git
+cd HackSheff10
 docker-compose -f docker-compose.arm.yml up -d
 ```
 
-See [PI_SETUP.md](PI_SETUP.md) for full guide.
+### Performance Notes
+- **Pi 4 (4GB)**: All services run, image generation 10-15s
+- **Pi 5 (8GB)**: Smooth performance, image generation 5-8s
+- **Apple Silicon**: Native ARM64, full performance
+
+### Optimization
+```bash
+# Monitor resources
+docker stats
+
+# View logs
+docker-compose logs -f backend
+```
 
 ## 💡 Key Features
 

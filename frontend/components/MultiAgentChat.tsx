@@ -7,6 +7,20 @@ interface Message {
   content: string;
   timestamp: string | Date;
   imageBase64?: string;
+  products?: Product[];
+}
+
+interface Product {
+  name: string;
+  price: string;
+  brand: string;
+  url?: string;
+}
+
+interface JourneyStop {
+  destination: string;
+  time: string;
+  outfit?: string;
 }
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -32,8 +46,13 @@ const MultiAgentChat: React.FC = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [thinkingAgents, setThinkingAgents] = useState<string[]>([]);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [showBrands, setShowBrands] = useState(false);
+  const [wishlist, setWishlist] = useState<Product[]>([]);
+  const [showWishlist, setShowWishlist] = useState(false);
+  const [journey, setJourney] = useState<JourneyStop[]>([]);
+  const [showTimeline, setShowTimeline] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -43,6 +62,13 @@ const MultiAgentChat: React.FC = () => {
 
   const handleSend = async () => {
     if (!input.trim()) return;
+
+    // Extract journey destinations from user input
+    const newStops = extractJourneyStops(input);
+    if (newStops.length > 0) {
+      setJourney(prev => [...prev, ...newStops]);
+      setShowTimeline(true);
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -54,6 +80,7 @@ const MultiAgentChat: React.FC = () => {
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+    setThinkingAgents(['IntentAgent', 'ConversationAgent', 'RecommendationAgent']);
 
     try {
       const response = await fetch(`${API_URL}/api/chat`, {
@@ -67,18 +94,29 @@ const MultiAgentChat: React.FC = () => {
 
       const data = await response.json();
       
-      const agentMessages: Message[] = data.responses.map((r: any) => ({
-        id: `${Date.now()}-${r.agent}`,
-        sender: r.agent,
-        content: r.message,
-        timestamp: r.timestamp,
-        imageBase64: r.image_base64
-      }));
+      const agentMessages: Message[] = data.responses.map((r: any) => {
+        const msg: Message = {
+          id: `${Date.now()}-${r.agent}`,
+          sender: r.agent,
+          content: r.message,
+          timestamp: r.timestamp,
+          imageBase64: r.image_base64
+        };
+        
+        // Extract products from RecommendationAgent
+        if (r.agent === 'RecommendationAgent') {
+          msg.products = extractProducts(r.message);
+        }
+        
+        return msg;
+      });
 
       setMessages(prev => [...prev, ...agentMessages]);
       setUploadedImage(null);
+      setThinkingAgents([]);
     } catch (error) {
       console.error('Chat error:', error);
+      setThinkingAgents([]);
       setMessages(prev => [...prev, {
         id: Date.now().toString(),
         sender: 'System',
@@ -99,6 +137,57 @@ const MultiAgentChat: React.FC = () => {
       setUploadedImage(reader.result as string);
     };
     reader.readAsDataURL(file);
+  };
+
+  const extractProducts = (text: string): Product[] => {
+    const products: Product[] = [];
+    // Extract products with prices (e.g., "Nike Air Max (£89.99)")
+    const pricePattern = /([A-Za-z\s&]+)\s*\(([£€$]\d+(?:\.\d{2})?)\)/g;
+    let match;
+    while ((match = pricePattern.exec(text)) !== null) {
+      products.push({
+        name: match[1].trim(),
+        price: match[2],
+        brand: 'Sports Direct' // Default, could be smarter
+      });
+    }
+    return products;
+  };
+
+  const addToWishlist = (product: Product) => {
+    if (!wishlist.find(p => p.name === product.name)) {
+      setWishlist([...wishlist, product]);
+    }
+  };
+
+  const getTotalPrice = () => {
+    return wishlist.reduce((sum, p) => {
+      const price = parseFloat(p.price.replace(/[£€$]/g, ''));
+      return sum + (isNaN(price) ? 0 : price);
+    }, 0).toFixed(2);
+  };
+
+  const extractJourneyStops = (text: string): JourneyStop[] => {
+    const stops: JourneyStop[] = [];
+    const patterns = [
+      /(?:going to|heading to|visiting|at the|for (?:a|an|the)) ([a-z\s]+?)(?:\.|,|;|\s+(?:and|then|after))/gi,
+      /destination[s]?:?\s*([a-z\s,]+)/gi
+    ];
+    
+    patterns.forEach(pattern => {
+      let match;
+      while ((match = pattern.exec(text)) !== null) {
+        const dest = match[1].trim();
+        if (dest.length > 3 && dest.length < 30) {
+          stops.push({
+            destination: dest.charAt(0).toUpperCase() + dest.slice(1),
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          });
+        }
+      }
+    });
+    
+    return stops;
   };
 
   const getAgentColor = (sender: string) => {
@@ -133,11 +222,27 @@ const MultiAgentChat: React.FC = () => {
                   timestamp: new Date()
                 }]);
                 setUploadedImage(null);
+                setJourney([]);
+                setShowTimeline(false);
               }}
               className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition text-sm"
             >
               🔄 New Chat
             </button>
+            <button
+              onClick={() => setShowWishlist(!showWishlist)}
+              className="px-4 py-2 bg-green-50 hover:bg-green-100 text-green-600 rounded-lg transition text-sm relative"
+            >
+              🛒 Cart {wishlist.length > 0 && `(${wishlist.length})`}
+            </button>
+            {journey.length > 0 && (
+              <button
+                onClick={() => setShowTimeline(!showTimeline)}
+                className="px-4 py-2 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded-lg transition text-sm"
+              >
+                🗺️ Journey ({journey.length})
+              </button>
+            )}
             <button
               onClick={() => setShowBrands(!showBrands)}
               className="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-lg transition text-sm"
@@ -163,6 +268,87 @@ const MultiAgentChat: React.FC = () => {
                 {brand.name} →
               </a>
             ))}
+          </div>
+        </div>
+      )}
+
+      {showWishlist && (
+        <div className="bg-white border-b shadow-sm p-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="font-semibold text-gray-700">🛒 Your Shopping Cart</h3>
+              {wishlist.length > 0 && (
+                <button
+                  onClick={() => setWishlist([])}
+                  className="text-xs text-red-600 hover:text-red-800"
+                >
+                  Clear All
+                </button>
+              )}
+            </div>
+            {wishlist.length === 0 ? (
+              <p className="text-sm text-gray-500">Your cart is empty. Add items from recommendations!</p>
+            ) : (
+              <>
+                <div className="space-y-2 mb-4">
+                  {wishlist.map((product, idx) => (
+                    <div key={idx} className="flex justify-between items-center bg-gray-50 p-3 rounded-lg">
+                      <div>
+                        <p className="font-medium text-sm">{product.name}</p>
+                        <p className="text-xs text-gray-600">{product.brand}</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="font-semibold text-green-600">{product.price}</span>
+                        <button
+                          onClick={() => setWishlist(wishlist.filter((_, i) => i !== idx))}
+                          className="text-red-500 hover:text-red-700 text-sm"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="border-t pt-3 flex justify-between items-center">
+                  <span className="font-bold text-lg">Total: £{getTotalPrice()}</span>
+                  <a
+                    href="https://www.sportsdirect.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-medium"
+                  >
+                    Shop Complete Look →
+                  </a>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {showTimeline && journey.length > 0 && (
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 border-b shadow-sm p-4">
+          <div className="max-w-6xl mx-auto">
+            <h3 className="font-semibold text-gray-700 mb-4">🗺️ Your Style Odyssey Timeline</h3>
+            <div className="relative">
+              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-purple-300"></div>
+              <div className="space-y-4">
+                {journey.map((stop, idx) => (
+                  <div key={idx} className="relative pl-10 animate-fadeIn" style={{ animationDelay: `${idx * 100}ms` }}>
+                    <div className="absolute left-2 w-4 h-4 bg-purple-500 rounded-full border-2 border-white shadow"></div>
+                    <div className="bg-white rounded-lg p-3 shadow-sm">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-semibold text-purple-900">{stop.destination}</p>
+                          {stop.outfit && <p className="text-xs text-gray-600 mt-1">{stop.outfit}</p>}
+                        </div>
+                        <span className="text-xs text-gray-500">{stop.time}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -199,6 +385,27 @@ const MultiAgentChat: React.FC = () => {
                     className="mt-3 rounded-lg max-w-md w-full"
                   />
                 )}
+                {msg.products && msg.products.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <p className="text-xs font-semibold text-gray-600 mb-2">💰 Recommended Products:</p>
+                    <div className="space-y-2">
+                      {msg.products.map((product, idx) => (
+                        <div key={idx} className="flex justify-between items-center bg-white bg-opacity-50 p-2 rounded">
+                          <div>
+                            <p className="text-xs font-medium">{product.name}</p>
+                            <p className="text-xs text-gray-600">{product.price}</p>
+                          </div>
+                          <button
+                            onClick={() => addToWishlist(product)}
+                            className="text-xs px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded transition"
+                          >
+                            + Cart
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {msg.sender === 'RecommendationAgent' && !msg.content.includes('🔗 Product Links') && (
                   <div className="mt-3 pt-3 border-t border-gray-200">
                     <p className="text-xs font-semibold text-gray-600 mb-2">🛍️ Shop at Frasers Group:</p>
@@ -221,15 +428,22 @@ const MultiAgentChat: React.FC = () => {
             </div>
           </div>
         ))}
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-gray-200 rounded-2xl px-4 py-3">
-              <div className="flex gap-1">
-                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+        {thinkingAgents.length > 0 && (
+          <div className="flex flex-col gap-2">
+            {thinkingAgents.map(agent => (
+              <div key={agent} className="flex justify-start">
+                <div className={`rounded-2xl px-4 py-3 shadow-sm ${getAgentColor(agent)}`}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold">{agent}</span>
+                    <div className="flex gap-1">
+                      <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                      <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                      <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         )}
         <div ref={messagesEndRef} />

@@ -1,6 +1,7 @@
 import os
 import google.generativeai as genai
 from openai import AsyncOpenAI
+from src.utils.prometheus_metrics import competitor_blocks, brand_mentions
 
 _gemini_configured = False
 _openai_client = None
@@ -24,35 +25,23 @@ def get_openai_client():
 
 async def generate_response(conversation_history: list, user_message: str) -> str:
     """
-    Generate conversational response using Gemini (FREE) or fallback to OpenAI
+    Generate conversational response - Frasers Group only
     """
     # Try Gemini first (FREE tier)
     if configure_gemini():
         try:
-            model = genai.GenerativeModel(
-                "gemini-3-pro-preview",
-                system_instruction="You are a Frasers Group employee. You can ONLY recommend Frasers Group stores: Sports Direct, House of Fraser, Flannels, USC, Jack Wills. NEVER mention competitors like JD Sports, ASOS, Zalando, Nike.com, Foot Locker, etc."
-            )
+            model = genai.GenerativeModel("gemini-3-pro-preview")
             
-            # Build conversation context
-            context = """You work for Frasers Group. You can ONLY recommend these stores:
-- Sports Direct
-- House of Fraser
-- Flannels
-- USC
-- Jack Wills
-
-FORBIDDEN: Never mention JD Sports, ASOS, Zalando, Nike.com, Adidas.com, Foot Locker, or any non-Frasers retailers.
-
-Conversation:
-"""
+            # Build conversation context with Frasers reminder
+            context = "You're a helpful fashion assistant. When suggesting stores, prefer: Sports Direct, House of Fraser, Flannels, USC, Jack Wills.\n\n"
             
             for msg in conversation_history[-10:]:
                 role = msg["role"]
                 content = msg["content"]
                 context += f"{role}: {content}\n"
             
-            context += f"\nUser: {user_message}\n\nRespond (Frasers brands only):"
+            # Add explicit constraint in the prompt itself
+            context += f"\nUser: {user_message}\n\nRespond helpfully:"
             
             response = model.generate_content(
                 context,
@@ -62,7 +51,36 @@ Conversation:
                     "max_output_tokens": 512,
                 }
             )
-            return response.text
+            
+            # Post-process to filter out competitor mentions
+            text = response.text
+            print(f"ConversationAgent raw response: {text[:100]}...")
+            
+            competitors = ['JD Sports', 'ASOS', 'Zalando', 'Nike.com', 'Adidas.com', 'Foot Locker', 
+                          'H&M', 'Zara', 'Uniqlo', 'Amazon', 'Nordstrom', 'Bloomingdale', 'Forever 21',
+                          'Revolve', 'Depop', 'Poshmark', 'Mango', 'Lululemon', 'Nike', 'Adidas',
+                          'Gap', 'Old Navy', 'Target', 'Walmart', 'Primark', 'Topshop', 'River Island']
+            
+            found_competitor = False
+            for competitor in competitors:
+                if competitor.lower() in text.lower():
+                    found_competitor = True
+                    print(f"ConversationAgent: Found competitor '{competitor}' - replacing response")
+                    break
+            
+            if found_competitor:
+                # Replace entire response with Frasers-only version
+                competitor_blocks.inc()
+                text = "You can find great clothes at Frasers Group stores! Check out:\n\n"
+                text += "- **Sports Direct** for activewear and casual clothing\n"
+                text += "- **House of Fraser** for premium fashion and formal wear\n"
+                text += "- **Flannels** for luxury designer brands\n"
+                text += "- **USC** for trendy streetwear\n"
+                text += "- **Jack Wills** for British heritage style\n\n"
+                text += "What style are you looking for? I can help you find the perfect Frasers store!"
+                print("ConversationAgent: Response replaced with Frasers-only content")
+            
+            return text
             
         except Exception as e:
             print(f"Gemini conversation error: {e}")
@@ -88,7 +106,29 @@ Conversation:
                 temperature=0.7
             )
             
-            return response.choices[0].message.content
+            text = response.choices[0].message.content
+            
+            # Apply same filter to OpenAI responses
+            competitors = ['JD Sports', 'ASOS', 'Zalando', 'Nike.com', 'Adidas.com', 'Foot Locker', 
+                          'H&M', 'Zara', 'Uniqlo', 'Amazon', 'Nordstrom', 'Bloomingdale', 'Forever 21',
+                          'Revolve', 'Depop', 'Poshmark', 'Mango', 'Lululemon', 'Nike', 'Adidas',
+                          'Gap', 'Old Navy', 'Target', 'Walmart', 'Primark', 'Topshop', 'River Island',
+                          'eBay', 'Etsy', 'Dick', 'Decathlon']
+            
+            for competitor in competitors:
+                if competitor.lower() in text.lower():
+                    print(f"ConversationAgent (OpenAI): Found competitor '{competitor}' - replacing")
+                    competitor_blocks.inc()
+                    text = "You can find great clothes at Frasers Group stores! Check out:\n\n"
+                    text += "- **Sports Direct** for activewear and casual clothing\n"
+                    text += "- **House of Fraser** for premium fashion and formal wear\n"
+                    text += "- **Flannels** for luxury designer brands\n"
+                    text += "- **USC** for trendy streetwear\n"
+                    text += "- **Jack Wills** for British heritage style\n\n"
+                    text += "What style are you looking for? I can help you find the perfect Frasers store!"
+                    break
+            
+            return text
         except Exception as e:
             print(f"OpenAI conversation error: {e}")
     
