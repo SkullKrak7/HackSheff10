@@ -27,64 +27,76 @@ def get_openai_client():
 
 async def recommend_outfit(user_request: str, wardrobe_context: str = "") -> str:
     """
-    Recommend outfit using Gemini with real Frasers product grounding
+    Recommend outfit using Gemini with Google Search grounding for real products
     """
     if configure_gemini():
         try:
-            model = genai.GenerativeModel(
-                "gemini-3-pro-preview",
-                tools=[{"google_search": {}}]  # Enable search grounding
+            from google import genai
+            from google.genai import types
+            
+            client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY"))
+            
+            grounding_tool = types.Tool(
+                google_search=types.GoogleSearch()
             )
             
-            prompt = f"""You're a fashion stylist. Search for REAL products available on Frasers Group websites and recommend them.
+            config = types.GenerateContentConfig(
+                tools=[grounding_tool],
+                temperature=0.7,
+                top_p=0.95,
+                max_output_tokens=512,
+            )
+            
+            prompt = f"""Search for REAL products on Frasers Group websites and recommend them:
 
-**Search these sites for actual products:**
+Sites to search:
 - sportsdirect.com (activewear, casual)
 - houseoffraser.co.uk (premium fashion)
 - flannels.com (designer brands)
 - usc.co.uk (streetwear)
 - jackwills.com (British style)
 
-**User Request:** {user_request}
-**Available Wardrobe:** {wardrobe_context if wardrobe_context else "None"}
+User: {user_request}
+Wardrobe: {wardrobe_context if wardrobe_context else "None"}
 
-**Your Response Must:**
-1. Search for 2-3 REAL products with prices
-2. Provide specific product names and brands
-3. Mention which Frasers site to buy from
-4. Keep under 150 words
-
-Format example:
-"Nike Air Max 90 (£89.99) from Sports Direct
-Ted Baker Blazer (£199) from House of Fraser"
-
-Search now and recommend real products."""
+Find 2-3 real products with prices and brands. Be specific."""
             
-            response = model.generate_content(
-                prompt,
-                generation_config={
-                    "temperature": 0.7,
-                    "top_p": 0.95,
-                    "max_output_tokens": 512,
-                }
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt,
+                config=config,
             )
             
-            result = response.text
+            text = response.text
             
-            # Extract grounding metadata if available
-            if hasattr(response, 'candidates') and response.candidates:
-                candidate = response.candidates[0]
-                if hasattr(candidate, 'grounding_metadata') and candidate.grounding_metadata:
-                    if hasattr(candidate.grounding_metadata, 'grounding_chunks'):
-                        result += "\n\n**🔗 Product Links:**"
-                        for chunk in candidate.grounding_metadata.grounding_chunks[:5]:
-                            if hasattr(chunk, 'web') and chunk.web:
-                                title = chunk.web.title if hasattr(chunk.web, 'title') else 'Product'
-                                uri = chunk.web.uri if hasattr(chunk.web, 'uri') else ''
-                                if uri:
-                                    result += f"\n- [{title}]({uri})"
+            # Add inline citations from grounding metadata
+            if response.candidates and response.candidates[0].grounding_metadata:
+                metadata = response.candidates[0].grounding_metadata
+                
+                if hasattr(metadata, 'grounding_supports') and metadata.grounding_supports:
+                    chunks = metadata.grounding_chunks if hasattr(metadata, 'grounding_chunks') else []
+                    
+                    # Sort by end_index descending to avoid shifting
+                    sorted_supports = sorted(
+                        metadata.grounding_supports,
+                        key=lambda s: s.segment.end_index,
+                        reverse=True
+                    )
+                    
+                    for support in sorted_supports:
+                        end_index = support.segment.end_index
+                        if support.grounding_chunk_indices:
+                            citation_links = []
+                            for i in support.grounding_chunk_indices:
+                                if i < len(chunks) and hasattr(chunks[i], 'web'):
+                                    uri = chunks[i].web.uri
+                                    citation_links.append(f"[🔗]({uri})")
+                            
+                            if citation_links:
+                                citation_string = " " + " ".join(citation_links)
+                                text = text[:end_index] + citation_string + text[end_index:]
             
-            return result
+            return text
             
         except Exception as e:
             print(f"Gemini recommendation error: {e}")
