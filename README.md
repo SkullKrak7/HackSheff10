@@ -1,109 +1,182 @@
 # Retail Odyssey 🧭
 
-**Your AI-Powered Style Journey**
+**Your AI-Powered Style Journey with Real Product Recommendations**
 
-A multi-agent AI system that guides users through their daily fashion odyssey - from morning classes to evening events, helping them navigate outfit transitions across different social contexts.
+A multi-agent AI system that guides users through their daily fashion odyssey, providing personalized outfit recommendations with **real products from Frasers Group** stores.
 
-## The Journey Concept
+![Gemini 3 Pro](https://img.shields.io/badge/Gemini-3%20Pro-blue)
+![Multi-Agent](https://img.shields.io/badge/Agents-5-green)
+![Frasers Group](https://img.shields.io/badge/Frasers-Integrated-orange)
 
-Life is a journey with multiple destinations. Retail Odyssey recognizes that your style needs evolve throughout the day:
-- 📚 Classes → 🍺 Pub → 🎬 Movie → 🎉 Nightclub
-- 💼 Work → 🍽️ Dinner → 🎭 Theater
-- ⚽ Gym → ☕ Coffee → 📅 Date
+## 🎯 HackSheffield10 Challenges
 
-Our 5 specialized AI agents collaborate to guide you through every transition.
+This project addresses **5 different challenges**:
 
-## Multi-Agent Architecture
+1. 🏆 **Reply AI Agents Challenge** - Multi-agent collaboration with context sharing
+2. 🏆 **Frasers Group Challenge** - Real product recommendations from Frasers brands
+3. 🏆 **Grafana Challenge** - Real-time monitoring dashboard
+4. 🏆 **Arm Challenge** - Optimized for Raspberry Pi & Apple Silicon
+5. 🏆 **Best Theme (Odyssey)** - Journey-based fashion guidance
+
+## 🤖 The 5 AI Agents
 
 ### 1. **IntentAgent** 🎯
-Classifies user intent and determines which agents to activate
+Classifies user intent and determines the journey path
 
 ### 2. **VisionAgent** 👁️
-Analyzes uploaded wardrobe images to understand what you already own
+Analyzes uploaded wardrobe images using Gemini 3 Pro vision
 
 ### 3. **RecommendationAgent** 👔
-Suggests outfits based on your journey, context, and wardrobe
+**Searches Frasers Group websites** for real products with:
+- Google Search grounding
+- Real prices and product names
+- Direct purchase links
+- Sports Direct, House of Fraser, Flannels, USC, Jack Wills
 
 ### 4. **ConversationAgent** 💬
-Maintains natural dialogue and asks clarifying questions
+Maintains natural dialogue and builds on other agents' insights
 
 ### 5. **ImageGenAgent** 🎨
-Visualizes outfit recommendations using AI image generation
+Generates outfit visualizations using Gemini 3 Pro Image
 
-## Key Features
+## 🛍️ Frasers Group Integration
 
-✅ **Context-Aware Recommendations**: Understands multi-destination journeys  
-✅ **Real-Time Collaboration**: Agents share context and build on each other's insights  
-✅ **Visual Feedback**: Generate outfit visualizations  
-✅ **Wardrobe Analysis**: Upload images of your clothes for personalized advice  
-✅ **Grafana Monitoring**: Real-time metrics on agent performance  
+**Real Product Grounding:**
+- Searches only Frasers Group websites
+- Returns actual products with prices
+- Provides clickable purchase links
+- Examples: Nike Revolution 7 (€55), Adidas Runfalcon 5
 
-## Tech Stack
+**Supported Brands:**
+- Sports Direct (activewear, casual)
+- House of Fraser (premium fashion)
+- Flannels (luxury designer)
+- USC (streetwear)
+- Jack Wills (British heritage)
 
-- **Backend**: FastAPI + Python
-- **AI**: Google Gemini 2.0 (free tier) + OpenAI (fallback)
-- **Frontend**: React + TypeScript + Vite
-- **Monitoring**: Prometheus + Grafana
-- **Deployment**: Docker (ARM-optimized for Apple Silicon)
+## 🚀 Quick Start
 
-## Quick Start
-
+### Docker (Recommended)
 ```bash
-# Start all services
 docker-compose up -d
-
-# Access
-Frontend: http://localhost:5173
-Backend: http://localhost:8000
-Grafana: http://localhost:3000 (admin/admin)
 ```
 
-## Hackathon Challenges Addressed
+### Local Development
+```bash
+# Backend
+cd retail_odyssey
+source venv/bin/activate
+python -m src.api.main
 
-### 🏆 Reply AI Agents Challenge
-- ✅ Multi-agent group conversation design
-- ✅ Targeted intent recognition
-- ✅ Context management & attribution
-- ✅ Asynchronous interaction & collaboration
+# Frontend
+cd frontend
+npm install
+npm run dev
+```
 
-### 🏆 Frasers Group Challenge
-- ✅ Next-gen retail engagement
-- ✅ Attracts Gen-Z with AI-powered personalization
-- ✅ Solves real problem: outfit transitions across contexts
+### Access
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:8000
+- **Grafana Dashboard**: http://localhost:3000 (admin/admin)
+- **Prometheus**: http://localhost:9090
 
-### 🏆 Grafana Challenge
-- ✅ Real-time monitoring of agent performance
-- ✅ Metrics on response times, usage patterns
+## 📊 Grafana Monitoring
 
-### 🏆 Arm Challenge
-- ✅ Dockerized for Apple Silicon (ARM architecture)
-
-### 🏆 Best Representation of Theme (Odyssey)
-- ✅ Literal journey through daily destinations
-- ✅ Style evolution as you travel through your day
-
-## Demo Scenario
-
-**User**: "I have classes, then a pub meetup, then a movie"
-
-**IntentAgent**: Classifies as multi-context outfit recommendation  
-**VisionAgent**: (If image uploaded) Analyzes current wardrobe  
-**RecommendationAgent**: Suggests versatile outfit with transition tips  
-**ConversationAgent**: Asks about preferences and clarifies details  
-**ImageGenAgent**: Generates visual of the recommended outfit  
-
-## Metrics & Monitoring
-
-View real-time agent performance in Grafana:
+Real-time metrics dashboard showing:
 - Total requests processed
 - Agent call distribution
 - Response time per agent
 - Requests per minute
 
-## Team
+See [GRAFANA_SETUP.md](GRAFANA_SETUP.md) for details.
+
+## 🥧 Raspberry Pi Deployment
+
+Optimized for ARM architecture (Pi 4/5, Apple Silicon):
+
+```bash
+docker-compose -f docker-compose.arm.yml up -d
+```
+
+See [PI_SETUP.md](PI_SETUP.md) for full guide.
+
+## 💡 Key Features
+
+✅ **Multi-Agent Collaboration** - Agents share context and build on each other's responses  
+✅ **Real Product Search** - Google Search grounding for actual Frasers inventory  
+✅ **Journey-Based UX** - Odyssey theme for multi-destination outfit planning  
+✅ **Image Analysis** - Upload wardrobe photos for personalized advice  
+✅ **Image Generation** - Visualize outfit recommendations  
+✅ **Real-Time Monitoring** - Grafana dashboard for system observability  
+✅ **ARM Optimized** - Runs on Raspberry Pi and Apple Silicon  
+
+## 🛠️ Tech Stack
+
+- **AI**: Google Gemini 3 Pro (latest model)
+- **Backend**: FastAPI + Python
+- **Frontend**: React + TypeScript + Vite
+- **Monitoring**: Prometheus + Grafana
+- **Deployment**: Docker + Docker Compose
+- **Architecture**: Multi-agent orchestration
+
+## 📝 Example Conversation
+
+```
+User: "I need outfit for funeral then party after"
+
+IntentAgent: Classifies as multi-context recommendation
+RecommendationAgent: Searches Frasers sites, finds:
+  - Black midi dress from House of Fraser (£89)
+  - Statement blazer from Flannels (£149)
+  - Provides clickable purchase links
+ConversationAgent: Asks about style preferences
+ImageGenAgent: Generates outfit visualization
+```
+
+## 🎨 The Odyssey Concept
+
+Life is a journey with multiple destinations. Retail Odyssey recognizes that your style needs evolve:
+- 📚 Classes → 🍺 Pub → 🎬 Movie
+- 💼 Work → 🍽️ Dinner → 🎭 Theater
+- ⚽ Gym → ☕ Coffee → 📅 Date
+
+Our AI agents guide you through every transition with appropriate outfit recommendations.
+
+## 🏗️ Architecture
+
+```
+User → Frontend (React)
+         ↓
+    Backend API (FastAPI)
+         ↓
+    Orchestrator
+    ├── IntentAgent (Gemini 3 Pro)
+    ├── VisionAgent (Gemini 3 Pro)
+    ├── RecommendationAgent (Gemini 2.5 Flash + Search)
+    ├── ConversationAgent (Gemini 3 Pro)
+    └── ImageGenAgent (Gemini 3 Pro Image)
+         ↓
+    Prometheus → Grafana
+```
+
+## 📦 Environment Setup
+
+Create `.env` file:
+```bash
+GEMINI_API_KEY=your_key_here
+OPENAI_API_KEY=your_fallback_key
+```
+
+## 🤝 Contributing
 
 Built at HackSheffield10 (Nov 29-30, 2025)
 
+## 📄 License
+
+MIT License
+
 ---
+
+**Powered by Google Gemini 3 Pro • Multi-Agent Collaboration • Frasers Group**
 
 *"Every day is a journey. Let AI guide your style."* 🧭
