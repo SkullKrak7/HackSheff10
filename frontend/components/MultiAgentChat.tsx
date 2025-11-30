@@ -40,6 +40,7 @@ const MultiAgentChat: React.FC = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [thinkingAgents, setThinkingAgents] = useState<string[]>([]);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [showBrands, setShowBrands] = useState(false);
   const [wishlist, setWishlist] = useState<Product[]>([]);
@@ -64,6 +65,7 @@ const MultiAgentChat: React.FC = () => {
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+    setThinkingAgents(['IntentAgent', 'ConversationAgent', 'RecommendationAgent']);
 
     try {
       const response = await fetch(`${API_URL}/api/chat`, {
@@ -96,8 +98,10 @@ const MultiAgentChat: React.FC = () => {
 
       setMessages(prev => [...prev, ...agentMessages]);
       setUploadedImage(null);
+      setThinkingAgents([]);
     } catch (error) {
       console.error('Chat error:', error);
+      setThinkingAgents([]);
       setMessages(prev => [...prev, {
         id: Date.now().toString(),
         sender: 'System',
@@ -349,15 +353,22 @@ const MultiAgentChat: React.FC = () => {
             </div>
           </div>
         ))}
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-gray-200 rounded-2xl px-4 py-3">
-              <div className="flex gap-1">
-                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+        {thinkingAgents.length > 0 && (
+          <div className="flex flex-col gap-2">
+            {thinkingAgents.map(agent => (
+              <div key={agent} className="flex justify-start">
+                <div className={`rounded-2xl px-4 py-3 shadow-sm ${getAgentColor(agent)}`}>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold">{agent}</span>
+                    <div className="flex gap-1">
+                      <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                      <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                      <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         )}
         <div ref={messagesEndRef} />
